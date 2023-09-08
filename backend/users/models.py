@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 class CustomUser(AbstractUser):
@@ -11,10 +12,11 @@ class CustomUser(AbstractUser):
         max_length=200,
         verbose_name="Фамилия"
     )
-    login = models.CharField(
+    username = models.CharField(
         max_length=200,
         verbose_name="Ник",
-         unique=True
+        unique=True,
+        validators=(UnicodeUsernameValidator(), )
     )
     email = models.EmailField(
         max_length=250,
@@ -23,11 +25,12 @@ class CustomUser(AbstractUser):
     )
 
     class Meta:
+        ordering = ('username', )
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
-        return self.username 
+        return self.username
 
 
 class Follow(models.Model):

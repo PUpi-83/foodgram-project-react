@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import (MaxValueValidator, MinValueValidator, RegexValidator)
 
-User = get_user_model()
+from users.models import CustomUser
+
 
 class Ingredients(models.Model):
     name = models.CharField(
@@ -57,7 +58,7 @@ class Tag(models.Model):
 class Recipes(models.Model):
     """Модель для рецепта"""
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name = 'Создатель рецепта')
@@ -83,7 +84,7 @@ class Recipes(models.Model):
         Tag,
         verbose_name='Тег'
     )
-    time = models.TimeField(
+    cooking_time = models.TimeField(
         validators=(MinValueValidator(5, message="На приготовление блюда должно уйти не меньше 5 минут"),
                     MaxValueValidator(48, message="Максимальное время приготовления не должно превышать 2 суток!")),
         verbose_name='Время на приготовление блюда'
@@ -97,17 +98,6 @@ class Recipes(models.Model):
                      MaxValueValidator(5, message="Максимальное количество порций 10, не больше")],
         verbose_name='Количество порций'
     )
-    difficulty = models.CharField(
-        max_length=20,
-        verbose_name='Уровень сложности приготовления'
-    )
-    calories = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        verbose_name='Калорийность',
-        null=True,
-        blank=True
-    )
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -119,7 +109,7 @@ class Recipes(models.Model):
 
 
 class IngredientsRecipes(models.Model):
-    """Ещё одна модель для ингридиентов"""
+    """Связывающая модель для ингридиентов и рецептов"""
     recipes = models.ForeignKey(
         Recipes,
         verbose_name="Рецепт",
@@ -146,7 +136,7 @@ class IngredientsRecipes(models.Model):
 class FavoriteShoppingList(models.Model):
     """Абстрактная модель для избранного и списка покупок"""
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         verbose_name="Пользователь"
     )
