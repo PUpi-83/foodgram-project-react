@@ -45,8 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "django_filters",
     'djoser',
-    
-    
+    'colorfield',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -161,6 +160,7 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+    'LOGIN_FIELD': 'email',
     "SERIALIZERS": {
         "user_create": "api.serializers.UserCreateSerializer",
         "user": "api.serializers.UserSerializer",

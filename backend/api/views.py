@@ -9,12 +9,12 @@ from rest_framework.decorators import action
 from rest_framework import status, viewsets
 from rest_framework.permissions import (IsAuthenticated, IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from recipes.models import Ingredients, Tag, Recipes, IngredientsRecipes, Favorite, ShoppingList
+from recipes.models import Ingredient, Tag, Recipe, AmountIngredients, Favorite, ShoppingCart
 from users.models import CustomUser, Follow
-from api.filtres import RecipesFilter, IngredientsFilter
+from api.filtres import RecipeFilter, IngredientFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import UserSerializer, SubscribeSerializer, FavoriteSerializer, TagSerializer, ShoppingListSerializer, RecipesSerializer, CreateRecipesSerializer, IngredientsSerializer
+from api.serializers import UserSerializer, SubscribeSerializer, FavoriteSerializer, TagSerializer, ShoppingCartSerializer, RecipeSerializer, CreateRecipesSerializer, IngredientsSerializer
 
 
 class UserViewSet(UserViewSet):
@@ -63,22 +63,24 @@ class UserViewSet(UserViewSet):
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientsSerializer
-    queryset = Ingredients.objects.all()
-    filter_backends = (IngredientsFilter,)
+    queryset = Ingredient.objects.all()
+    filter_backends = (IngredientFilter,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = None
 
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = None
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    serializer_class = RecipesSerializer
-    queryset = Recipes.objects.all()
+    serializer_class = CreateRecipesSerializer
+    queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipesFilter
+    filterset_class = RecipeFilter
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
     pagination_class = CustomPagination
 
@@ -86,7 +88,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def perform_recipe_action(self, model, user, pk, action):
-        recipe = get_object_or_404(Recipes, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         obj, created = model.objects.get_or_create(user=user, recipe=recipe)
         
         if created and action == 'add':
@@ -97,7 +99,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         else:
             return Response({'errors': 'Рецепт уже добавлен/удален!'}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = RecipesSerializer(recipe)
+        serializer = RecipeSerializer(recipe)
         return Response(serializer.data, status=status_code)
 
     def add_to(self, model, user, pk):
@@ -106,17 +108,17 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def delete_from(self, model, user, pk):
         return self.perform_recipe_action(model, user, pk, 'delete')
 
-    def download_shopping_list(self, request, pk=None):
+    def download_shopping_cart(self, request, pk=None):
         if pk is not None:
-            recipes = get_object_or_404(Recipes, pk=id)
-            ingredients = IngredientsRecipes.objects.filter(recipe=recipes)
+            recipes = get_object_or_404(Recipe, pk=id)
+            ingredients = AmountIngredients.objects.filter(recipe=recipes)
             shopping_list = defaultdict(float)
             for ingredient in ingredients:
                 shopping_list[ingredient.ingredient.name] += ingredient.amount
             output_format = request.query_params.get('format', 'txt')
             if output_format == 'txt':
                 response = HttpResponse(content_type='text/plain')
-                response['Content-Disposition'] = f'attachment; filename="{recipes.title}_shopping_list.txt"'
+                response['Content-Disposition'] = f'attachment; filename="{recipes.name}_shopping_list.txt"'
                 for ingredient, quantity in shopping_list.items():
                     response.write(f'{ingredient} — {quantity} г\n')
                 return response
@@ -127,7 +129,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 for ingredient, quantity in shopping_list.items():
                     pdf.cell(200, 10, txt=f'{ingredient} — {quantity} г', ln=True)
                 response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = f'attachment; filename="{recipes.title}_shopping_list.pdf"'
+                response['Content-Disposition'] = f'attachment; filename="{recipes.name}_shopping_list.pdf"'
                 pdf.output(response, dest='S')
                 return response
             else:
