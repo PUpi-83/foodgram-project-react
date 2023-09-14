@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.db.models import UniqueConstraint
 from django.db import models
 
 class CustomUser(AbstractUser):
@@ -34,23 +35,17 @@ class CustomUser(AbstractUser):
 
 
 class Follow(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name="Автор",
-        related_name='follower'
-    )
-    author = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name="Подписчик",
-        related_name='following'
-    )
+    following = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                                  verbose_name='Подписка',
+                                  related_name='following')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             verbose_name='Подписчик',
+                             related_name='follower')
 
     class Meta:
-        verbose_name = "Подписка"
-        verbose_name_plural = "Подписки"
+        verbose_name = 'Подписки'
+        UniqueConstraint(fields=['following', 'user'], name='follow_unique')
 
     def __str__(self):
-        return f"{self.user} подписан на {self.author}"
+        return f"{self.user} подписан на {self.following}"
 
