@@ -14,11 +14,11 @@ from users.models import CustomUser, Follow
 from api.filtres import RecipeFilter, IngredientFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import UserSerializer, SubscribeSerializer, FavoriteSerializer, TagSerializer, ShoppingCartSerializer, RecipeSerializer, CreateRecipesSerializer, IngredientsSerializer
+from api.serializers import CustomUserSerializer, SubscribeSerializer, FavoriteSerializer, TagSerializer, ShoppingCartSerializer, RecipeSerializer, CreateRecipesSerializer, IngredientsSerializer
 
 
 class UserViewSet(UserViewSet):
-    serializer_class = UserSerializer
+    serializer_class = CustomUserSerializer
     pagination_class = CustomPagination
 
     @action(detail=True, 
@@ -83,9 +83,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
     pagination_class = CustomPagination
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
 
     def perform_recipe_action(self, model, user, pk, action):
         recipe = get_object_or_404(Recipe, id=pk)

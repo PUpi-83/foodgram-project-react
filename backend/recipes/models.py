@@ -20,10 +20,11 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингридиенты'
         verbose_name_plural = 'Ингредиенты'
-        ordering = ('name',)
+        ordering = ['name']
     
     def __str__(self):
-         return f'{self.name}, {self.measurement_unit}'
+        return f'{self.name}, {self.measurement_unit}'
+
 
 
 class Tag(models.Model):
@@ -67,7 +68,7 @@ class Recipe(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='recipes',
-        verbose_name = 'Создатель рецепта')
+        verbose_name = 'Автор рецепта')
     
     name = models.CharField(
         max_length=200,
@@ -83,12 +84,13 @@ class Recipe(models.Model):
         verbose_name='Описание рецепта'
     )
     ingredients = models.ManyToManyField(
-        Ingredient, 
+        Ingredient,
         verbose_name='Ингридиенты',
         through='AmountIngredients'
     )
     tags = models.ManyToManyField(
         Tag,
+        related_name='tags',
         verbose_name='Тег'
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -104,47 +106,50 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ('-pub_date',)
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.name
 
 
-class FavoriteShoppingCart(models.Model):
-    """Абстрактная модель для избранного и списка покупок"""
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь"
+class Favorite(models.Model):
+    """Модель для избранных рецептов"""
+    user = models.ForeignKey(CustomUser, related_name='favorites',
+                             on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, related_name='favorites',
+                               on_delete=models.CASCADE)
+    added = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата добавления в избранное'
     )
 
-    recipes = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name="Рецепт"
-    )
 
     class Meta:
-        abstract = True
-        verbose_name = "Избранный элемент"
-        verbose_name_plural = "Избранные элементы"
-
-    def __str__(self):
-        return f"{self.user}, {self.recipes}"
-
-class Favorite(FavoriteShoppingCart):
-    """Модель для избранных рецептов"""
-    class Meta(FavoriteShoppingCart.Meta):
-        default_related_name = 'favorites'
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"
 
-class ShoppingCart(FavoriteShoppingCart):
+    def __str__(self):
+        return f"{self.user} has favorites: {self.recipe.name}"
+
+class ShoppingCart(models.Model):
     """Модель для списка покупок"""
-    class Meta(FavoriteShoppingCart.Meta):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             related_name='user_shopping_list',
+                             verbose_name='Пользоавтель')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='purchases',
+                               verbose_name='Покупка')
+    added = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата добавления в список покупок'
+    )
+
+
+    class Meta:
         default_related_name = 'shopping_list'
         verbose_name = "Корзина"
         verbose_name_plural = "Корзина"
+
+    def __str__(self):
+        return f'In {self.user} shopping list: {self.recipe}'
 
 
 class AmountIngredients(models.Model):
@@ -154,19 +159,16 @@ class AmountIngredients(models.Model):
                                verbose_name='Рецепт')
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
+                                   related_name='ingredients_in_recipe',
                                    verbose_name='Ингредиент')
-    amount = models.PositiveIntegerField(
-        validators=[MinValueValidator(1, message='В рцепте должен быть минимум 1 ингредиет'),
-                    MaxValueValidator(50,message='В рцепте должно быть максимум 50 ингредиетов')],
+    amount = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)],
         verbose_name='Количество ингредиента'
     )
 
     class Meta:
-        ordering = ('-id',)
         verbose_name = 'Количество ингридиента'
         verbose_name_plural = 'Количество ингредиентов'
 
     def __str__(self):
-        return(
-            f'{self.ingredient.name}, {self.ingredient.measurement_unit}'
-            f' - {self.amount} ')
+        return f'{self.ingredient} в рецепте {self.recipe}'
