@@ -1,6 +1,7 @@
 import base64
 from rest_framework.exceptions import ValidationError
-from recipes.models import (ShoppingCart, Ingredients, RecipeIngredients, Recipes,
+from recipes.models import (ShoppingCart, Ingredients,
+                            RecipeIngredients, Recipes,
                             Tags, FavoriteList)
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
@@ -105,7 +106,8 @@ class RecipesSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
-        return ShoppingCart.objects.filter(user_id=user.id, recipe_id=obj.id).exists()
+        return ShoppingCart.objects.filter(user_id=user.id,
+                                           recipe_id=obj.id).exists()
 
     def validate(self, data):
         """Проверяет данные для создания и редактирования рецепта."""

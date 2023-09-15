@@ -9,8 +9,6 @@ from djoser.views import UserViewSet
 from rest_framework.views import APIView
 
 
-
-
 class CustomUserViewSet(UserViewSet):
     """Представление для пользователей."""
 

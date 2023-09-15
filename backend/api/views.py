@@ -1,5 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (ShoppingCart, Ingredients, RecipeIngredients, Recipes,
+from recipes.models import (ShoppingCart, Ingredients,
+                            RecipeIngredients, Recipes,
                             Tags, FavoriteList)
 from rest_framework import status
 from rest_framework.decorators import action

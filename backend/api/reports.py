@@ -6,6 +6,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from .func import declination_ingredients
 from reportlab.pdfgen.canvas import Canvas
 
+
 def create_recipe_shopping_list(response):
     """Создание файла с ингредиентами для рецепта."""
 
@@ -29,4 +30,5 @@ def create_recipe_shopping_list(response):
     canvas.showPage()
     canvas.save()
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename="create_recipe_shopping_list.pdf")
+    return FileResponse(buffer, as_attachment=True,
+                        filename="create_recipe_shopping_list.pdf")

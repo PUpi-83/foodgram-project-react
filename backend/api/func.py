@@ -1,5 +1,6 @@
 import pymorphy2
 
+
 def declination_ingredients(name, amount):
     """Склонение количества ингредиентов"""
 

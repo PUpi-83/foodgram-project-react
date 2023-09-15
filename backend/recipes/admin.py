@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import (ShoppingCart, Ingredients, MeasureUnits, RecipeIngredients,
-                     Recipes, RecipeTags, Tags, FavoriteList)
+from .models import (ShoppingCart, Ingredients, MeasureUnits,
+                     RecipeIngredients, Recipes, RecipeTags,
+                     Tags, FavoriteList)
 
 
 @admin.register(MeasureUnits)
