@@ -1,15 +1,14 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import Recipes
 from rest_framework import serializers
-
-from .models import Follow, User
+from .models import Follow, CustomUser
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор для регистрации пользователя."""
+    """Сериализатор регистрации."""
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             "email",
             "id",
@@ -21,7 +20,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         password = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
-        user = User.objects.create(
+        user = CustomUser.objects.create(
             email=validated_data["email"],
             username=validated_data["username"],
             first_name=validated_data["first_name"],
@@ -33,12 +32,12 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
-    """Сериализатор для отображения информации о пользователе."""
+    """Сериализатор авторизированного пользовател."""
 
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             "email",
             "id",
@@ -49,7 +48,6 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        """Проверяет подписан ли текущий пользователь на другого."""
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
@@ -57,7 +55,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для краткого отображения сведений о рецепте."""
+    """Сериализатор кратких сведений о рецепте."""
 
     class Meta:
         model = Recipes
@@ -65,13 +63,13 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(CustomUserSerializer):
-    """Сериализатор для вывода подписок пользователя."""
+    """Сериализатор подписок пользователя."""
 
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             "email",
             "id",

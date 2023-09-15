@@ -1,23 +1,21 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Cart, Ingredients, RecipeIngredients, Recipes,
-                            Tags, Wishlist)
+from recipes.models import (ShoppingCart, Ingredients, RecipeIngredients, Recipes,
+                            Tags, FavoriteList)
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-
 from django.db.models import Sum
-
 from .filters import IngredientsSearchFilter, RecipesFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from .pagination import CustomPageNumberPagination
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from .permissions import AdminOrAuthorOrReadOnly
-from .reports import cart_report
-from .serializers import (CartSerializer, IngredientsSerializer,
+from rest_framework.generics import get_object_or_404
+from .reports import create_recipe_shopping_list
+from .serializers import (ShoppingCartSerializer, IngredientsSerializer,
                           RecipesSerializer, TagsSerializer,
-                          WishlistSerializer)
+                          FavoriteListSerializer)
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -71,13 +69,13 @@ class RecipesViewSet(ModelViewSet):
     )
     def favorite(self, request, pk):
         return self.post_method_for_actions(
-            request=request, pk=pk, serializers=WishlistSerializer
+            request=request, pk=pk, serializers=FavoriteListSerializer
         )
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
         return self.delete_method_for_actions(
-            request=request, pk=pk, model=Wishlist
+            request=request, pk=pk, model=FavoriteList
         )
 
     @action(
@@ -87,7 +85,7 @@ class RecipesViewSet(ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         return self.post_method_for_actions(
-            request=request, pk=pk, serializers=CartSerializer
+            request=request, pk=pk, serializers=ShoppingCartSerializer
         )
 
     @shopping_cart.mapping.delete
@@ -95,7 +93,7 @@ class RecipesViewSet(ModelViewSet):
         return self.delete_method_for_actions(
             request=request,
             pk=pk,
-            model=Cart,
+            model=ShoppingCart,
         )
 
     @action(
@@ -106,11 +104,11 @@ class RecipesViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
 
         user = request.user
-        if not user.cart_user.exists():
+        if not user.shoppingcart_user.exists():
             return Response(status=HTTP_400_BAD_REQUEST)
         ingredients = (
             RecipeIngredients.objects.filter(
-                recipe__cart_recipe__user=request.user,
+                recipe__shoppingcart_recipe__user=request.user,
             )
             .values_list(
                 "ingredient__name",
@@ -120,4 +118,4 @@ class RecipesViewSet(ModelViewSet):
             .order_by("ingredient__name")
         )
 
-        return cart_report(ingredients)
+        return create_recipe_shopping_list(ingredients)

@@ -1,26 +1,27 @@
 from api.pagination import CustomPageNumberPagination
-from djoser.views import UserViewSet
 from rest_framework import status
+from .models import Follow, CustomUser
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from .serializers import CustomUserSerializer, FollowSerializer
 from rest_framework.response import Response
+from djoser.views import UserViewSet
 from rest_framework.views import APIView
 
-from .models import Follow, User
-from .serializers import CustomUserSerializer, FollowSerializer
+
 
 
 class CustomUserViewSet(UserViewSet):
-    """ViewSet для работы с пользователями."""
+    """Представление для пользователей."""
 
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = CustomPageNumberPagination
 
 
 class FollowViewSet(APIView):
-    """APIView для добавления и удаления подписки на автора."""
+    """Представление для добавления/удаления подписки."""
 
     serializer_class = FollowSerializer
     permission_classes = (IsAuthenticated,)
@@ -41,7 +42,7 @@ class FollowViewSet(APIView):
                 {"error": "Вы уже подписаны на этого пользователя"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        author = get_object_or_404(User, id=user_id)
+        author = get_object_or_404(CustomUser, id=user_id)
         Follow.objects.create(user=request.user, author_id=user_id)
         return Response(
             self.serializer_class(author, context={"request": request}).data,
@@ -50,7 +51,7 @@ class FollowViewSet(APIView):
 
     def delete(self, request, *args, **kwargs):
         user_id = self.kwargs.get("user_id")
-        get_object_or_404(User, id=user_id)
+        get_object_or_404(CustomUser, id=user_id)
         subscription = Follow.objects.filter(
             user=request.user,
             author_id=user_id,
@@ -65,11 +66,11 @@ class FollowViewSet(APIView):
 
 
 class FollowListView(ListAPIView):
-    """APIView для просмотра подписок."""
+    """Представление для просмотра подписок."""
 
     serializer_class = FollowSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        return User.objects.filter(following__user=self.request.user)
+        return CustomUser.objects.filter(following__user=self.request.user)

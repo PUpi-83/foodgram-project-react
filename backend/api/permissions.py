@@ -1,6 +1,5 @@
 from rest_framework import permissions
 
-
 class AdminOrAuthorOrReadOnly(permissions.BasePermission):
     """Права доступа только на чтение."""
 

@@ -1,6 +1,5 @@
-from colorfield.fields import ColorField
-
 from django.contrib.auth import get_user_model
+from colorfield.fields import ColorField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -24,7 +23,7 @@ class Tags(models.Model):
 
 
 class MeasureUnits(models.Model):
-    """Модель для единиц измерения ингредиентов."""
+    """Модель единиц измерения ингредиентов."""
 
     name = models.CharField("Наименование", max_length=20, unique=True)
 
@@ -38,7 +37,7 @@ class MeasureUnits(models.Model):
 
 
 class Ingredients(models.Model):
-    """Модель для ингредиентов."""
+    """Модель ингредиентов."""
 
     name = models.CharField("Название", max_length=100)
     measurement_unit = models.ForeignKey(
@@ -58,7 +57,7 @@ class Ingredients(models.Model):
 
 
 class Recipes(models.Model):
-    """Модель для рецептов."""
+    """Модель рецептов."""
 
     author = models.ForeignKey(
         User,
@@ -101,7 +100,7 @@ class Recipes(models.Model):
 
 
 class RecipeIngredients(models.Model):
-    """Модель связей рецептов (Recipes) с ингредиентами (Ingredients)."""
+    """Связывающая модель рецептов с ингредиентами."""
 
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredients, on_delete=models.CASCADE)
@@ -125,7 +124,7 @@ class RecipeIngredients(models.Model):
 
 
 class RecipeTags(models.Model):
-    """Модель связей рецептов (Recipes) с тегами (Tags)."""
+    """Связывающая модель рецептов с тегами."""
 
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
@@ -141,19 +140,19 @@ class RecipeTags(models.Model):
         ]
 
 
-class Wishlist(models.Model):
-    """Модель для списка избранного."""
+class FavoriteList(models.Model):
+    """Модель избранных рецептов."""
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='wishlist_user',
+        related_name='favoritelist_user',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipes,
         on_delete=models.CASCADE,
-        related_name='wishlist_recipe',
+        related_name='favoritelist_recipe',
         verbose_name='Рецепт'
     )
 
@@ -162,7 +161,7 @@ class Wishlist(models.Model):
         verbose_name_plural = 'Списки избранного'
         constraints = [
             models.UniqueConstraint(
-                name="unique_wishlist",
+                name="unique_favoritelist",
                 fields=["user", "recipe"],
             ),
         ]
@@ -171,19 +170,19 @@ class Wishlist(models.Model):
         return f"{self.user} добавил {self.recipe} в список избранного"
 
 
-class Cart(models.Model):
-    """Модель для списка покупок."""
+class ShoppingCart(models.Model):
+    """Модель списка покупок."""
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='cart_user',
+        related_name='shoppingcart_user',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipes,
         on_delete=models.CASCADE,
-        related_name='cart_recipe',
+        related_name='shoppingcart_recipe',
         verbose_name='Рецепт'
     )
 
@@ -192,7 +191,7 @@ class Cart(models.Model):
         verbose_name_plural = 'Списки покупок'
         constraints = [
             models.UniqueConstraint(
-                name="unique_cart",
+                name="unique_shoppingcart",
                 fields=["user", "recipe"],
             ),
         ]

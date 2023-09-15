@@ -1,16 +1,12 @@
-import io
-
 from reportlab.lib.pagesizes import A4
+import io
 from reportlab.pdfbase import pdfmetrics
+from django.http import FileResponse
 from reportlab.pdfbase.ttfonts import TTFont
+from .func import declination_ingredients
 from reportlab.pdfgen.canvas import Canvas
 
-from django.http import FileResponse
-
-from .func import fix_morph
-
-
-def cart_report(response):
+def create_recipe_shopping_list(response):
     """Создание файла с ингредиентами для рецепта."""
 
     buffer = io.BytesIO()
@@ -27,10 +23,10 @@ def cart_report(response):
             50,
             start_pos,
             f"{count + 1}. {ingredient[0].capitalize()} - {ingredient_amount} "
-            f"{fix_morph(ingredient_type, ingredient_amount)}",
+            f"{declination_ingredients(ingredient_type, ingredient_amount)}",
         )
         start_pos -= 15
     canvas.showPage()
     canvas.save()
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename="cart_report.pdf")
+    return FileResponse(buffer, as_attachment=True, filename="create_recipe_shopping_list.pdf")

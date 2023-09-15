@@ -1,16 +1,17 @@
 from django.contrib import admin
-
-from .models import (Cart, Ingredients, MeasureUnits, RecipeIngredients,
-                     Recipes, RecipeTags, Tags, Wishlist)
+from .models import (ShoppingCart, Ingredients, MeasureUnits, RecipeIngredients,
+                     Recipes, RecipeTags, Tags, FavoriteList)
 
 
 @admin.register(MeasureUnits)
 class MeasureUnitsAdmin(admin.ModelAdmin):
+    """Регистрация модели количества ингреиента в админке."""
     model = MeasureUnits
 
 
 @admin.register(Ingredients)
 class IngredientsAdmin(admin.ModelAdmin):
+    """Регистрация модели ингредиентов в админке."""
     model = Ingredients
     list_display = ("name", "measurement_unit")
     list_filter = ("name",)
@@ -20,6 +21,7 @@ class IngredientsAdmin(admin.ModelAdmin):
 
 @admin.register(Recipes)
 class RecipesAdmin(admin.ModelAdmin):
+    """Регистрация модели рецепта в админке."""
     class TagsInline(admin.TabularInline):
         model = RecipeTags
         extra = 1
@@ -39,22 +41,25 @@ class RecipesAdmin(admin.ModelAdmin):
 
 @admin.register(Tags)
 class TagsAdmin(admin.ModelAdmin):
+    """Регистрация модели тегов в админке."""
     model = Tags
     list_display = ("name", "color", "slug")
     search_fields = ("name",)
 
 
-@admin.register(Wishlist)
-class WishlistAdmin(admin.ModelAdmin):
-    model = Wishlist
+@admin.register(FavoriteList)
+class FavoriteListAdmin(admin.ModelAdmin):
+    """Регистрация модели избранных рецептов в админке."""
+    model = FavoriteList
     list_display = ("id", "user", "recipe")
     search_fields = ("user", "recipe")
     list_filter = ("user", "recipe")
 
 
-@admin.register(Cart)
-class CartAdmin(admin.ModelAdmin):
-    model = Cart
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    """Регистрация модели списка покупок в админке."""
+    model = ShoppingCart
     list_display = ("id", "user", "recipe")
     search_fields = ("user", "recipe")
     list_filter = ("user", "recipe")

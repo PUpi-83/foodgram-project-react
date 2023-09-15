@@ -1,6 +1,6 @@
 from django_filters import AllValuesMultipleFilter
-from django_filters.rest_framework import BooleanFilter, FilterSet
 from recipes.models import Recipes
+from django_filters.rest_framework import BooleanFilter, FilterSet
 from rest_framework.filters import SearchFilter
 
 
@@ -30,11 +30,11 @@ class RecipesFilter(FilterSet):
     def filter_is_favorited(self, queryset, name, value):
         """Фильтрация рецептов в избранном."""
         if value:
-            return queryset.filter(wishlist_recipe__user=self.request.user)
+            return queryset.filter(favoritelist_recipe__user=self.request.user)
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         """Фильтрация рецептов в списке покупок."""
         if value:
-            return queryset.filter(cart_recipe__user=self.request.user)
+            return queryset.filter(shoppingcart_recipe__user=self.request.user)
         return queryset

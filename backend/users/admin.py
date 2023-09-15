@@ -1,10 +1,10 @@
 from django.contrib import admin
+from .models import Follow, CustomUser
 
-from .models import Follow, User
 
-
-@admin.register(User)
+@admin.register(CustomUser)
 class UserAdmin(admin.ModelAdmin):
+    """Регистрация модели пользователя в админке."""
     list_display = (
         "username",
         "email",
@@ -18,6 +18,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
+    """Регистрация модели подписки в админке."""
     model = Follow
     list_display = ("id", "user", "author")
     search_fields = ("user", "author")

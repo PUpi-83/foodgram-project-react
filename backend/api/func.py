@@ -1,7 +1,6 @@
 import pymorphy2
 
-
-def fix_morph(name, amount):
+def declination_ingredients(name, amount):
     """Склонение количества ингредиентов"""
 
     morph = pymorphy2.MorphAnalyzer()
