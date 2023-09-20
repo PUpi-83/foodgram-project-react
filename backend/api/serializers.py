@@ -1,24 +1,15 @@
-import base64
-from rest_framework.exceptions import ValidationError
-from recipes.models import (ShoppingCart, Ingredients,
-                            RecipeIngredients, Recipes,
-                            Tags, FavoriteList)
+# import base64
+from drf_extra_fields.fields import Base64ImageField
+# from django.core.files.base import ContentFile
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.validators import UniqueTogetherValidator
+
+from foodgram.settings import (POSITIVE_NUMBER, POSITIVE_NUMBER_1)
+from recipes.models import (FavoriteList, Ingredients, RecipeIngredients,
+                            Recipes, ShoppingCart, Tags)
 from users.serializers import CustomUserSerializer
-from django.core.files.base import ContentFile
-
-
-class Base64ImageField(serializers.ImageField):
-    """Сериализатор для изображений."""
-
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith("data:image"):
-            img_format, img_str = data.split(";base64,")
-            ext = img_format.split("/")[-1]
-            data = ContentFile(base64.b64decode(img_str), name=f"temp.{ext}")
-
-        return super().to_internal_value(data)
 
 
 class TagsSerializer(serializers.ModelSerializer):
@@ -133,9 +124,8 @@ class RecipesSerializer(serializers.ModelSerializer):
         for tag in tags:
             if not Tags.objects.filter(id=tag):
                 raise ValidationError(f"Тег {tag} не существует")
+            validated_tags.append(tag)
             if tag not in validated_tags:
-                validated_tags.append(tag)
-            else:
                 raise ValidationError(f"Тег {tag} уже был передан")
         return validated_tags
 
@@ -153,7 +143,8 @@ class RecipesSerializer(serializers.ModelSerializer):
                     f"Ингредиент с 'id' {ingredient.get('id')} не существует"
                 )
             amount = ingredient.get("amount")
-            if not str(amount).isdecimal() or not 0 < int(amount) <= 32767:
+            if (not str(amount).isdecimal() or
+                    not POSITIVE_NUMBER < int(amount) <= POSITIVE_NUMBER_1):
                 raise ValidationError(
                     f"Значение amount '{ingredient.get('amount')}' "
                     "должно быть положительным числом от 1 до 32767"
@@ -175,11 +166,12 @@ class RecipesSerializer(serializers.ModelSerializer):
         """Создает связь между ингредиентами и рецептом."""
 
         for ingredient in ingredients:
-            RecipeIngredients.objects.get_or_create(
-                recipe=recipe,
-                ingredient=get_object_or_404(Ingredients, pk=ingredient["id"]),
-                amount=ingredient.get("amount"),
-            )
+            RecipeIngredients.objects.bulk_create(
+                [RecipeIngredients(
+                    recipe=recipe,
+                    ingredient=get_object_or_404(Ingredients,
+                                                 pk=ingredient["id"]),
+                    amount=ingredient.get("amount"),)])
 
     def create(self, validated_data):
         """Создает рецепт."""
@@ -222,18 +214,13 @@ class FavoriteListSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteList
         fields = ("id", "user", "recipe")
-
-    def validate(self, data):
-        user = self.context["request"].user
-        recipe = data.get("recipe")
-        if self.Meta.model.objects.filter(
-            user_id=user.id,
-            recipe_id=recipe,
-        ).exists():
-            raise serializers.ValidationError(
-                f"Данный рецепт уже добавлен в {self.Meta.model.__name__}"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=FavoriteList.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже добавлен в избранное'
             )
-        return data
+        ]
 
     def to_representation(self, instance):
         request = self.context.get("request")

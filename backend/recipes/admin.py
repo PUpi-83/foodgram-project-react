@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import (ShoppingCart, Ingredients, MeasureUnits,
-                     RecipeIngredients, Recipes, RecipeTags,
-                     Tags, FavoriteList)
+
+from .models import (FavoriteList, Ingredients, MeasureUnits,
+                     RecipeIngredients, Recipes, RecipeTags, ShoppingCart,
+                     Tags)
 
 
 @admin.register(MeasureUnits)
@@ -33,11 +34,18 @@ class RecipesAdmin(admin.ModelAdmin):
 
     model = Recipes
     inlines = (TagsInline, IngredientsInline)
-    list_display = ("name", "author")
+    list_display = ("name", "author", "favorite_count")
+    readonly_fields = ("favorite_count",)
     search_fields = ("name",)
     list_filter = ("author", "name", "tags")
     filter_horizontal = ("tags",)
     empty_value_display = "-отсутствует-"
+
+    def favorite_count(self, obj):
+        """Метод для вычисления и отображения """
+        """количества добавлений рецепта в избранное."""
+        return FavoriteList.objects.filter(recipe=obj).count()
+    favorite_count.short_description = "Количество добавлений в избранное"
 
 
 @admin.register(Tags)
