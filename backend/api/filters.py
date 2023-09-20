@@ -31,11 +31,13 @@ class RecipesFilter(FilterSet):
     def filter_is_favorited(self, queryset, name, value):
         """Фильтрация рецептов в избранном."""
         if value:
-            return queryset.filter(favorite_list_recipe__user=self.request.user)
+            return queryset.filter(
+                favorite_list_recipe__user=self.request.user)
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         """Фильтрация рецептов в списке покупок."""
         if value:
-            return queryset.filter(shopping_cart_recipe__user=self.request.user)
+            return queryset.filter(
+                shopping_cart_recipe__user=self.request.user)
         return queryset
