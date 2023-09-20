@@ -3,9 +3,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from foodgram.settings import (AMOUNT, POSITIVE_NUMBER_1,
-                               TIME, TIME_1, LENGTH_NAME,
-                               LENGTH_SLUG)
+from foodgram.settings import (AMOUNT, LENGTH_NAME, LENGTH_SLUG,
+                               POSITIVE_NUMBER_1, TIME, TIME_1)
 
 User = get_user_model()
 

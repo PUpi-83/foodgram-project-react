@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodgram.settings import (POSITIVE_NUMBER, POSITIVE_NUMBER_1)
+from foodgram.settings import POSITIVE_NUMBER, POSITIVE_NUMBER_1
 from recipes.models import (FavoriteList, Ingredients, RecipeIngredients,
                             Recipes, ShoppingCart, Tags)
 from users.serializers import CustomUserSerializer
@@ -143,8 +143,8 @@ class RecipesSerializer(serializers.ModelSerializer):
                     f"Ингредиент с 'id' {ingredient.get('id')} не существует"
                 )
             amount = ingredient.get("amount")
-            if (not str(amount).isdecimal() or
-                    not (POSITIVE_NUMBER < int(amount) <= POSITIVE_NUMBER_1)):
+            if (not str(amount).isdecimal() or not (
+                    POSITIVE_NUMBER < int(amount) <= POSITIVE_NUMBER_1)):
                 raise ValidationError(
                     f"Значение amount '{ingredient.get('amount')}' "
                     "должно быть положительным числом от 1 до 32767"
