@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from api.pagination import CustomPageNumberPagination
-
 from .models import CustomUser, Follow
 from .serializers import CustomUserSerializer, FollowSerializer
 

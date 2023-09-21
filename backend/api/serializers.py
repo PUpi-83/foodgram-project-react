@@ -1,15 +1,16 @@
-# import base64
 from drf_extra_fields.fields import Base64ImageField
-# from django.core.files.base import ContentFile
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueTogetherValidator
 
-from django.conf import settings
-
-from recipes.models import (FavoriteList, Ingredients, RecipeIngredients,
-                            Recipes, ShoppingCart, Tags)
+from recipes.models import (FavoriteList,
+                            Ingredients,
+                            RecipeIngredients,
+                            Recipes,
+                            ShoppingCart,
+                            Tags)
 from users.serializers import CustomUserSerializer
 
 
@@ -156,14 +157,14 @@ class RecipesSerializer(serializers.ModelSerializer):
     @staticmethod
     def create_ingredients(ingredients, recipe):
         """Создает связь между ингредиентами и рецептом."""
-        recipe_ingredients = []
-        for ingredient in ingredients:
-            recipe_ingredient = RecipeIngredients(
+        recipe_ingredients = [
+            RecipeIngredients(
                 recipe=recipe,
                 ingredient=get_object_or_404(Ingredients, pk=ingredient["id"]),
                 amount=ingredient.get("amount"),
             )
-            recipe_ingredients.append(recipe_ingredient)
+            for ingredient in ingredients
+        ]
         RecipeIngredients.objects.bulk_create(recipe_ingredients)
 
     def create(self, validated_data):
@@ -200,7 +201,7 @@ class RecipesShortSerializer(RecipesSerializer):
 
 
 class BaseListSerializer(serializers.ModelSerializer):
-    """Общий базовый сериализатор для моделей Wishlist и Cart."""
+    """Общий базовый сериализатор для моделей FavoriteList и ShoppingCart."""
     def to_representation(self, instance):
         request = self.context.get("request")
         context = {"request": request}
@@ -208,7 +209,7 @@ class BaseListSerializer(serializers.ModelSerializer):
 
 
 class FavoriteListSerializer(BaseListSerializer):
-    """Сериализатор для модели Wishlist."""
+    """Сериализатор для модели FavoriteList."""
 
     class Meta:
         model = FavoriteList
@@ -223,7 +224,7 @@ class FavoriteListSerializer(BaseListSerializer):
 
 
 class ShoppingCartSerializer(BaseListSerializer):
-    """Сериализатор для модели Cart."""
+    """Сериализатор для модели ShoppingCart."""
 
     class Meta:
         model = ShoppingCart

@@ -1,14 +1,14 @@
 import io
 
 from django.http import FileResponse
+from django.conf import settings
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
 
-from django.conf import settings
 
-from .numbers import number_ingredients
+from .numbers import declination_ingredients
 
 
 def create_recipe_shopping_list(response):
@@ -29,7 +29,7 @@ def create_recipe_shopping_list(response):
             50,
             start_pos,
             f"{count}. {ingredient[0].capitalize()} - {ingredient_amount} "
-            f"{number_ingredients(ingredient_type, ingredient_amount)}",
+            f"{declination_ingredients(ingredient_type, ingredient_amount)}",
         )
         start_pos -= settings.LINE_HEIGHT_INCREMENT
     canvas.showPage()

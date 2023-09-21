@@ -3,10 +3,13 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = 'django-insecure-fyu_y_t(!qz(tcm*(r%5uk$#b@$bt)o02-msam3ay1ek&k7(wo'
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = True
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# SECRET_KEY = os.getenv('SECRET_KEY')
+
+# DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
