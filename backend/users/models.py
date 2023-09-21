@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 class CustomUser(AbstractUser):
     """Модель пользователя."""
-
     password = models.CharField(_("password"), max_length=150)
     email = models.EmailField(_("email address"), max_length=254, unique=True)
     first_name = models.CharField(_("first name"), max_length=150)
@@ -32,7 +31,6 @@ class CustomUser(AbstractUser):
 
 class Follow(models.Model):
     """Модель подписчиков."""
-
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

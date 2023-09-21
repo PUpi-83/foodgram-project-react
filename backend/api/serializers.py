@@ -6,7 +6,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodgram.settings import POSITIVE_NUMBER, POSITIVE_NUMBER_1
+from django.conf import settings
+
 from recipes.models import (FavoriteList, Ingredients, RecipeIngredients,
                             Recipes, ShoppingCart, Tags)
 from users.serializers import CustomUserSerializer
@@ -22,7 +23,6 @@ class TagsSerializer(serializers.ModelSerializer):
 
 class IngredientsSerializer(serializers.ModelSerializer):
     """Сериализатор для ингредиентов."""
-
     measurement_unit = serializers.CharField(source="measurement_unit.name")
 
     class Meta:
@@ -32,7 +32,6 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientsSerializer(serializers.ModelSerializer):
     """Сериализатор для количества ингредиентов в рецепте."""
-
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
     measurement_unit = serializers.ReadOnlyField(
@@ -46,7 +45,6 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
 
 class RecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для рецепта."""
-
     tags = TagsSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField(read_only=True)
@@ -76,13 +74,11 @@ class RecipesSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_ingredients(obj):
         """Получает список ингредиентов с количеством."""
-
         queryset = RecipeIngredients.objects.filter(recipe=obj)
         return RecipeIngredientsSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
         """Проверяет, содержится ли данный рецепт в списке избранного."""
-
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
@@ -93,7 +89,6 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         """Проверяет, содержится ли данный рецепт в списке покупок."""
-
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
@@ -102,7 +97,6 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Проверяет данные для создания и редактирования рецепта."""
-
         name = self.initial_data.get("name").strip()
         tags = self.initial_data.get("tags")
         ingredients = self.initial_data.get("ingredients")
@@ -115,7 +109,6 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, tags):
         """Проверяет теги."""
-
         if not isinstance(tags, list):
             raise ValidationError(
                 "Параметр 'tags' не является списком (list)"
@@ -131,7 +124,6 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, ingredients):
         """Проверяет ингредиенты."""
-
         if not isinstance(ingredients, list):
             raise ValidationError(
                 "Параметр 'ingredients' не является списком (list)"
@@ -144,7 +136,8 @@ class RecipesSerializer(serializers.ModelSerializer):
                 )
             amount = ingredient.get("amount")
             if (not str(amount).isdecimal() or not (
-                    POSITIVE_NUMBER < int(amount) <= POSITIVE_NUMBER_1)):
+                    settings.MIN_POSITIVE_AMOUNT < int(amount)
+                    <= settings.MAX_POSITIVE_AMOUNT)):
                 raise ValidationError(
                     f"Значение amount '{ingredient.get('amount')}' "
                     "должно быть положительным числом от 1 до 32767"
@@ -157,25 +150,25 @@ class RecipesSerializer(serializers.ModelSerializer):
     @staticmethod
     def create_tags(tags, recipe):
         """Создает связь между тегами и рецептом."""
-
         for tag in tags:
             recipe.tags.add(tag)
 
     @staticmethod
     def create_ingredients(ingredients, recipe):
         """Создает связь между ингредиентами и рецептом."""
-
+        recipe_ingredients = []
         for ingredient in ingredients:
-            RecipeIngredients.objects.bulk_create(
-                [RecipeIngredients(
-                    recipe=recipe,
-                    ingredient=get_object_or_404(Ingredients,
-                                                 pk=ingredient["id"]),
-                    amount=ingredient.get("amount"),)])
+            recipe_ingredient = RecipeIngredients(
+                            recipe=recipe,
+                            ingredient=get_object_or_404(Ingredients,
+                                                         pk=ingredient["id"]),
+                            amount=ingredient.get("amount"),
+            )
+            recipe_ingredients.append(recipe_ingredient)
+        RecipeIngredients.objects.bulk_create(recipe_ingredients)
 
     def create(self, validated_data):
         """Создает рецепт."""
-
         image = validated_data.pop("image")
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
@@ -186,7 +179,6 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Редактирует рецепт."""
-
         instance.tags.clear()
         RecipeIngredients.objects.filter(recipe=instance).delete()
         self.create_tags(validated_data.pop("tags"), instance)
@@ -208,7 +200,15 @@ class RecipesShortSerializer(RecipesSerializer):
         read_only_fields = ("__all__",)
 
 
-class FavoriteListSerializer(serializers.ModelSerializer):
+class BaseListSerializer(serializers.ModelSerializer):
+    """Общий базовый сериализатор для моделей Wishlist и Cart."""
+    def to_representation(self, instance):
+        request = self.context.get("request")
+        context = {"request": request}
+        return RecipesShortSerializer(instance.recipe, context=context).data
+
+
+class FavoriteListSerializer(BaseListSerializer):
     """Сериализатор для модели Wishlist."""
 
     class Meta:
@@ -222,15 +222,17 @@ class FavoriteListSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def to_representation(self, instance):
-        request = self.context.get("request")
-        context = {"request": request}
-        return RecipesShortSerializer(instance.recipe, context=context).data
 
-
-class ShoppingCartSerializer(FavoriteListSerializer):
+class ShoppingCartSerializer(BaseListSerializer):
     """Сериализатор для модели Cart."""
 
     class Meta:
         model = ShoppingCart
         fields = ("id", "user", "recipe")
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже добавлен в список покупок'
+            )
+        ]

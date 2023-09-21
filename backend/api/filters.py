@@ -7,13 +7,11 @@ from recipes.models import Recipes
 
 class IngredientsSearchFilter(SearchFilter):
     """Фильтрация ингредиента по имени."""
-
     search_param = "name"
 
 
 class RecipesFilter(FilterSet):
     """Фильтр рецепта."""
-
     tags = AllValuesMultipleFilter(
         field_name="tags__slug",
     )

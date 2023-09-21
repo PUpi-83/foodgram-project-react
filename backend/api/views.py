@@ -21,7 +21,6 @@ from .serializers import (FavoriteListSerializer, IngredientsSerializer,
 
 class TagsViewSet(ReadOnlyModelViewSet):
     """Viewset для модели Tags."""
-
     queryset = Tags.objects.all()
     serializer_class = TagsSerializer
     pagination_class = None
@@ -29,7 +28,6 @@ class TagsViewSet(ReadOnlyModelViewSet):
 
 class IngredientsViewSet(ReadOnlyModelViewSet):
     """Viewset для модели Ingredients."""
-
     queryset = Ingredients.objects.all()
     serializer_class = IngredientsSerializer
     filter_backends = (IngredientsSearchFilter,)
@@ -39,7 +37,6 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
 
 class RecipesViewSet(ModelViewSet):
     """Viewset для модели Recipes."""
-
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = (AdminOrAuthorOrReadOnly,)

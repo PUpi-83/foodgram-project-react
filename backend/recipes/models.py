@@ -3,18 +3,17 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from foodgram.settings import (AMOUNT, LENGTH_NAME, LENGTH_SLUG,
-                               POSITIVE_NUMBER_1, TIME, TIME_1)
+from django.conf import settings
 
 User = get_user_model()
 
 
 class Tags(models.Model):
     """Модель для тегов."""
-
-    name = models.CharField("Имя", max_length=LENGTH_NAME)
+    name = models.CharField("Имя", max_length=settings.LENGTH_NAME)
     color = ColorField("Цвет", default='#FF0000')
-    slug = models.SlugField(max_length=LENGTH_SLUG, unique=True)
+    slug = models.SlugField(max_length=settings.LENGTH_SLUG,
+                            unique=True)
 
     class Meta:
         verbose_name = "Тег"
@@ -27,8 +26,8 @@ class Tags(models.Model):
 
 class MeasureUnits(models.Model):
     """Модель единиц измерения ингредиентов."""
-
-    name = models.CharField("Наименование", max_length=LENGTH_NAME,
+    name = models.CharField("Наименование",
+                            max_length=settings.LENGTH_NAME,
                             unique=True)
 
     class Meta:
@@ -42,8 +41,7 @@ class MeasureUnits(models.Model):
 
 class Ingredients(models.Model):
     """Модель ингредиентов."""
-
-    name = models.CharField("Название", max_length=LENGTH_NAME)
+    name = models.CharField("Название", max_length=settings.LENGTH_NAME)
     measurement_unit = models.ForeignKey(
         MeasureUnits,
         null=True,
@@ -62,14 +60,14 @@ class Ingredients(models.Model):
 
 class Recipes(models.Model):
     """Модель рецептов."""
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="recipes",
         verbose_name="Автор",
     )
-    name = models.CharField("Название рецепта", max_length=LENGTH_NAME)
+    name = models.CharField("Название рецепта",
+                            max_length=settings.LENGTH_NAME)
     image = models.ImageField(
         "Изображение", upload_to="images", null=True, default=None
     )
@@ -88,9 +86,9 @@ class Recipes(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         "Время приготовления (минут)",
-        validators=[MinValueValidator(TIME,
+        validators=[MinValueValidator(settings.MIN_COOKING_TIME_MINUTES,
                                       message='Время не меньше 1 минуты'),
-                    MaxValueValidator(TIME_1,
+                    MaxValueValidator(settings.MAX_COOKING_TIME_MINUTES,
                                       message='Время не больше 1000 минут')],
     )
     pub_date = models.DateTimeField(
@@ -109,14 +107,14 @@ class Recipes(models.Model):
 
 class RecipeIngredients(models.Model):
     """Связывающая модель рецептов с ингредиентами."""
-
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredients, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(
         "Количество",
         validators=(
-            MinValueValidator(AMOUNT, message='Минимальное количество - 1'),
-            MaxValueValidator(POSITIVE_NUMBER_1,
+            MinValueValidator(settings.MINIMUM_ALLOWED_AMOUNT,
+                              message='Минимальное количество - 1'),
+            MaxValueValidator(settings.MAX_POSITIVE_AMOUNT,
                               message='Максимальное количество - 32767')
         ),
     )
@@ -134,7 +132,6 @@ class RecipeIngredients(models.Model):
 
 class RecipeTags(models.Model):
     """Связывающая модель рецептов с тегами."""
-
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
 
@@ -151,7 +148,6 @@ class RecipeTags(models.Model):
 
 class FavoriteList(models.Model):
     """Модель избранных рецептов."""
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -181,7 +177,6 @@ class FavoriteList(models.Model):
 
 class ShoppingCart(models.Model):
     """Модель списка покупок."""
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

@@ -35,7 +35,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserSerializer(UserSerializer):
     """Сериализатор авторизированного пользовател."""
-
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -66,7 +65,6 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(CustomUserSerializer):
     """Сериализатор подписок пользователя."""
-
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
 

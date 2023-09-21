@@ -13,7 +13,6 @@ from .serializers import CustomUserSerializer, FollowSerializer
 
 class CustomUserViewSet(UserViewSet):
     """Представление для пользователей."""
-
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -37,12 +36,11 @@ class CustomUserViewSet(UserViewSet):
             Follow.objects.create(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if self.request.method == 'DELETE':
-            subscription = get_object_or_404(
-                Follow, user=user, author=author
-            )
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        subscription = get_object_or_404(
+            Follow, user=user, author=author
+        )
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,

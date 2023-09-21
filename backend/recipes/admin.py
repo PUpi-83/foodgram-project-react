@@ -42,9 +42,10 @@ class RecipesAdmin(admin.ModelAdmin):
     empty_value_display = "-отсутствует-"
 
     def favorite_count(self, obj):
-        """Метод для вычисления и отображения """
-        """количества добавлений рецепта в избранное."""
+        """Метод для вычисления и отображения
+        количества добавлений рецепта в избранное."""
         return FavoriteList.objects.filter(recipe=obj).count()
+
     favorite_count.short_description = "Количество добавлений в избранное"
 
 
