@@ -47,11 +47,11 @@
 - Склонировать репозиторий:
 
 ```bash
-   git clone <название репозитория>
+   git clone https://github.com/PUpi-83/foodgram-project-react.git
 ```
 
 ```bash
-   cd <название репозитория> 
+   cd foodgram-project-react
 ```
 
 Cоздать и активировать виртуальное окружение:
