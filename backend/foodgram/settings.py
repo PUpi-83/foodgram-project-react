@@ -1,17 +1,20 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-fyu_y_t(!qz(tcm*(r%5uk$#b@$bt)o02-msam3ay1ek&k7(wo'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# SECRET_KEY = os.getenv('SECRET_KEY')
-
-# DEBUG = os.getenv('DEBUG', 'False') == 'True'
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['158.160.70.16',
+                 '127.0.0.1',
+                 'localhost',
+                 'foodgramkitty.sytes.net']
 
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
@@ -111,10 +114,10 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / "collected_static"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -152,6 +155,7 @@ DJOSER = {
 
 FONT_SIZE_14 = 14
 FONT_SIZE_18 = 18
+FONT_SIZE_12 = 12
 LENGTH_NAME = 250
 LENGTH_SLUG = 20
 LINE_HEIGHT = 750

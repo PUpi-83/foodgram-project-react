@@ -4,14 +4,22 @@ cffi==   1.15.1
 coreapi==2.3.3
 coreschema== 0.0.4
 cryptography==41.0.3
+charset-normalizer==3.2.0
+DAWG-Python==0.7.2
 defusedxml== 0.7.1
 Django==3.2.20
 django-extra-fields==3.0.2
+django-cors-headers==3.13.0
+django-debug-toolbar==3.2.4
 django-filter==23.2
 django-templated-mail==1.1.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==4.7.2
+drf-extra-fields==3.1.1
+django-colorfield==0.10.1
+docopt==0.6.2
 djoser== 2.1.0
+fpdf==1.7.2
 idna==3.4
 itypes==1.2.0
 Jinja2==3.1.2
@@ -21,10 +29,19 @@ Pillow==10.0.0
 pip==23.2.1
 pycparser==2.21
 PyJWT==2.8.0
+PyYAML==6.0
 python3-openid==3.2.0
+python-dotenv==1.0.0
+psycopg2-binary==2.9.3
+pytest-django==4.4.0
+pytest-pythonpath==0.7.3
 pytz==2023.3
+pymorphy2==0.9.1
+pymorphy2-dicts-ru==2.4.417127.4579844
+pymystem3==0.2.0
 requests==2.31.0
 requests-oauthlib==1.3.1
+reportlab==4.0.4
 setuptools==58.1.0
 six==1.16.0
 social-auth-app-django==4.0.0
@@ -33,12 +50,4 @@ sqlparse==0.4.4
 typing_extensions==4.7.1
 uritemplate==4.1.1
 urllib3==2.0.4
-psycopg2-binary==2.9.3
-fpdf==1.7.2
-charset-normalizer==3.2.0
-DAWG-Python==0.7.2
-django-colorfield==0.10.1
-docopt==0.6.2
-pymorphy2==0.9.1
-pymorphy2-dicts-ru==2.4.417127.4579844
-reportlab==4.0.4
+webcolors==1.11.1

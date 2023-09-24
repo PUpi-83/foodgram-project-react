@@ -5,12 +5,13 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import (FavoriteList,
-                            Ingredients,
-                            RecipeIngredients,
-                            Recipes,
-                            ShoppingCart,
-                            Tags)
+from recipes.models import (
+    FavoriteList,
+    Ingredients,
+    RecipeIngredients,
+    Recipes,
+    ShoppingCart,
+    Tags)
 from users.serializers import CustomUserSerializer
 
 
