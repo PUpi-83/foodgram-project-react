@@ -19,9 +19,7 @@
 - Возможность скачать список покупок в PDF формате.
 - Фильтрация по полям.
 
-
-https://github.com/PUpi-83/foodgram-project-react/assets/120481017/b6dd0cd7-c9bc-42cd-8dce-170fe38e9381
-
+https://github.com/PUpi-83/foodgram-project-react/assets/120481017/dd247bbb-59c0-4cef-ad3f-4d428f231f46
 
 #### Документация к API доступна по адресу <http://localhost/api/docs/> после локального запуска проекта
 
