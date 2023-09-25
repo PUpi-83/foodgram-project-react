@@ -44,7 +44,7 @@ https://github.com/PUpi-83/foodgram-project-react/assets/120481017/dd247bbb-59c0
 - пароль: TwinKi320211
 ```
 
-#### Локальный запуск проекта
+#### Инмтрукция по установке:
 
 - Склонировать репозиторий:
 
@@ -118,6 +118,43 @@ python manage.py createsuperuser
 
 ```bash
    python manage.py runserver
+```
+
+#### Лкальный запуск в контенерах:
+
+- Из папки infra/ разверните контейнеры при помощи docker-compose:
+
+```bash
+docker-compose up -d --build
+```
+- Выполните миграции:
+
+```bash
+docker-compose exec backend python manage.py migrate
+```
+
+- Создайте суперпользователя:
+
+```bash
+winpty docker-compose exec backend python manage.py createsuperuser
+```
+
+- Соберите статику:
+
+```bash
+docker-compose exec backend python manage.py collectstatic --no-input
+```
+
+- Наполните базу данных ингредиентами. Выполняйте команду из дериктории где находится файл manage.py:
+
+```bash
+docker-compose exec backend python manage.py load_ingredients
+```
+
+- Остановка проекта:
+
+```bash
+docker-compose down
 ```
 
 ### Инструкция для разворачивания проекта на удаленном сервере:
