@@ -11,7 +11,8 @@ from recipes.models import (
     RecipeIngredients,
     Recipes,
     ShoppingCart,
-    Tags)
+    Tags
+)
 from users.serializers import CustomUserSerializer
 
 

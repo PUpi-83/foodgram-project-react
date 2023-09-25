@@ -24,7 +24,8 @@ from .serializers import (
     IngredientsSerializer,
     RecipesSerializer,
     ShoppingCartSerializer,
-    TagsSerializer)
+    TagsSerializer
+)
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
